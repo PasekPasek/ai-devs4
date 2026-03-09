@@ -1,0 +1,20 @@
+{
+  "name": "ai-devs4",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "S01E01-people": "tsx tasks/S01E01-people/index.ts",
+    "S01E01-people:watch": "tsx watch tasks/S01E01-people/index.ts",
+    "task": "tsx"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5"
+  }
+}
