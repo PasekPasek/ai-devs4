@@ -69,7 +69,7 @@ async function callOpenRouter(
     throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
   }
 
-  const data: ChatResponse = await response.json();
+  const data = await response.json() as ChatResponse;
   const choice = data.choices[0];
 
   console.log(`[LLM] ${config.model} → finish_reason: ${choice.finish_reason}`);

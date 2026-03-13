@@ -130,7 +130,7 @@ Przeanalizuj dane bardzo dokładnie i zwróć TYLKO JSON z następującą strukt
     throw new Error(`OpenRouter API error ${response.status}: ${errorText}`);
   }
 
-  const result = await response.json();
+  const result = await response.json() as any;
   const content = result.choices[0].message.content;
 
   // Usuń markdown code blocks jeśli są

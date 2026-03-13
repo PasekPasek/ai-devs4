@@ -9,6 +9,7 @@
     "S01E03-proxy": "tsx tasks/S01E03-proxy/index.ts",
     "S01E03-proxy:watch": "tsx watch tasks/S01E03-proxy/index.ts",
     "S01E04-sendit": "tsx tasks/S01E04-sendit/index.ts",
+    "S01E05-railway": "tsx tasks/S01E05-railway/index.ts",
     "task": "tsx"
   },
   "dependencies": {

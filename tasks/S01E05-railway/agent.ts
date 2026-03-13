@@ -1,9 +1,6 @@
 import { config } from './config.js';
 import { executeToolCall } from './tool-handlers.js';
 
-/**
- * Message types for OpenRouter chat
- */
 interface Message {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
@@ -37,9 +34,6 @@ interface ChatResponse {
   };
 }
 
-/**
- * Call OpenRouter API with function calling
- */
 async function callOpenRouter(
   messages: Message[],
   tools: any[]
@@ -54,12 +48,12 @@ async function callOpenRouter(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${config.openRouterToken}`,
       'HTTP-Referer': 'https://github.com/ppasek/ai-devs4',
-      'X-Title': 'AI_DEVS4 - SentIt Agent'
+      'X-Title': 'AI_DEVS4 - Railway Agent'
     },
     body: JSON.stringify({
       model: config.model,
-      messages: messages,
-      tools: tools,
+      messages,
+      tools,
       tool_choice: 'auto'
     })
   });
@@ -91,20 +85,12 @@ async function callOpenRouter(
   };
 }
 
-/**
- * Run the AI agent with agentic loop
- */
 export async function runAgent(
   systemPrompt: string,
   tools: any[],
-  maxIterations: number = 20
+  maxIterations: number = 30
 ): Promise<any> {
-  const messages: Message[] = [
-    {
-      role: 'system',
-      content: systemPrompt
-    }
-  ];
+  const messages: Message[] = [{ role: 'system', content: systemPrompt }];
 
   console.log('\n=== AGENT STARTED ===');
   console.log(`Model: ${config.model}`);
@@ -113,10 +99,8 @@ export async function runAgent(
   for (let iteration = 0; iteration < maxIterations; iteration++) {
     console.log(`\n--- Iteration ${iteration + 1}/${maxIterations} ---`);
 
-    // Call LLM
     const response = await callOpenRouter(messages, tools);
 
-    // If no tool calls, agent finished
     if (!response.tool_calls || response.tool_calls.length === 0) {
       console.log('\n=== AGENT COMPLETED (no more tool calls) ===');
       return {
@@ -126,46 +110,32 @@ export async function runAgent(
       };
     }
 
-    // Add assistant message to history
     messages.push(response.message);
 
-    // Execute all tool calls
     for (const toolCall of response.tool_calls) {
       console.log(`\n[AGENT] Calling tool: ${toolCall.function.name}`);
       console.log(`[AGENT] Arguments: ${toolCall.function.arguments}`);
 
-      // Execute the tool
       const result = await executeToolCall(toolCall);
 
-      console.log(`[AGENT] Result: ${result.substring(0, 300)}${result.length > 300 ? '...' : ''}`);
+      console.log(`[AGENT] Result: ${result.substring(0, 500)}${result.length > 500 ? '...' : ''}`);
 
-      // Add tool result to messages
       messages.push({
         role: 'tool',
         tool_call_id: toolCall.id,
         content: result
       });
 
-      // Check if submit_declaration succeeded (code 0)
-      if (toolCall.function.name === 'submit_declaration') {
-        try {
-          const parsed = JSON.parse(result);
-          if (parsed.code === 0) {
-            console.log('\n=== AGENT COMPLETED (submit_declaration succeeded) ===');
-            return { completed: true, result: parsed, iterations: iteration + 1 };
-          }
-          console.log(`[AGENT] submit_declaration failed (code ${parsed.code}), continuing...`);
-        } catch {
-          // non-JSON result, continue
+      // Detect flag in response body
+      if (result.includes('{FLG:')) {
+        const match = result.match(/\{FLG:[^}]+\}/);
+        if (match) {
+          console.log(`\n=== FLAG FOUND: ${match[0]} ===`);
+          return { completed: true, flag: match[0], result, iterations: iteration + 1 };
         }
       }
     }
-
-    // Add delay between iterations
-    await new Promise((resolve) => setTimeout(resolve, config.apiCallDelayMs));
   }
 
-  throw new Error(
-    `Agent exceeded maximum iterations (${maxIterations}). This might indicate the agent is stuck in a loop.`
-  );
+  throw new Error(`Agent exceeded maximum iterations (${maxIterations}).`);
 }
