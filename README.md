@@ -10,9 +10,11 @@ ai_devs4/
 ├── package.json                  # Wszystkie zależności
 ├── tsconfig.json                 # Wspólna konfiguracja TypeScript
 └── tasks/
-    ├── S01E01-people/            # Format: S{sezon:02d}E{epizod:02d}-{nazwa}
-    ├── S01E02-.../
-    └── ...
+    ├── S01E01-people/            # Wykrywanie anomalii w danych osobowych
+    ├── S01E02-findhim/           # Agent identyfikujący podejrzanego na podstawie opisów
+    ├── S01E03-proxy/             # Proxy server z inteligentnym przekierowaniem paczek
+    ├── S01E04-sendit/            # Agent wypełniający deklaracje SPK
+    └── S01E05-railway/           # Agent odblokowujący trasę kolejową X-01
 ```
 
 ## Uruchamianie zadań
@@ -20,9 +22,14 @@ ai_devs4/
 ```bash
 # Pojedyncze uruchomienie
 npm run S01E01-people
+npm run S01E02-findhim
+npm run S01E03-proxy
+npm run S01E04-sendit
+npm run S01E05-railway
 
 # Tryb watch (auto-reload przy zmianach)
 npm run S01E01-people:watch
+npm run S01E03-proxy:watch
 
 # Bezpośrednie uruchomienie (dla zadań bez skryptu npm)
 npm run task tasks/S01E02-nazwa/index.ts
@@ -116,6 +123,21 @@ tasks/S01E01-people/
 ├── utils.ts           # Funkcje pomocnicze
 └── people.csv         # Dane (ignorowane przez git)
 ```
+
+## Struktura agenta (S01E04+)
+
+Zadania oparte na agencie LLM używają wspólnego wzorca:
+
+```
+tasks/S01EXX-nazwa/
+├── index.ts           # Punkt wejścia, system prompt, main()
+├── config.ts          # Stałe: URL, model, limity iteracji
+├── agent.ts           # Pętla agenta (OpenRouter + tool calling)
+├── tools.ts           # Definicje narzędzi (format OpenAI function calling)
+└── tool-handlers.ts   # Implementacja narzędzi, obsługa błędów HTTP
+```
+
+Model: `anthropic/claude-sonnet-4-5` via OpenRouter
 
 ## Wsparcie
 
